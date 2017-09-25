@@ -172,6 +172,16 @@ var Docs = {
 		});
 	},
 
+	toggleShowQueryOperationsForResource: function(resource){
+		Docs.expandEndpointListForResource(resource);
+		var elem = $('#' + Docs.escapeResourceName(resource) + '_query_operations_holder');
+		if (elem.is(':visible')) {
+			elem.slideUp();
+		} else {
+			elem.slideDown();
+		}
+	},
+
 	escapeResourceName: function(resource) {
 		return resource.replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~]/g, "\\$&");
 	},

@@ -20,7 +20,13 @@
     <li>
       <a href='{{url}}'>Raw</a>
     </li>
+    <li>
+      <a href='#' onclick="Docs.toggleShowQueryOperationsForResource('{{name}}')">Query</a>
+    </li>
   </ul>
+</div>
+<div class='query-operations-holder' id='{{name}}_query_operations_holder' style='display:none; text-align: right; padding-bottom: 6px;'>
+  <input type='text' class='query-operations-input' style='width:200px; font-size: 12px; padding: 4px 6px;' placeholder='请输入关键字，回车' />
 </div>
 <ul class='endpoints' id='{{name}}_endpoint_list' style='display:none'>
 </ul>

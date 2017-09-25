@@ -172,6 +172,16 @@ var Docs = {
 		});
 	},
 
+	toggleShowQueryOperationsForResource: function(resource){
+		Docs.expandEndpointListForResource(resource);
+		var elem = $('#' + Docs.escapeResourceName(resource) + '_query_operations_holder');
+		if (elem.is(':visible')) {
+			elem.slideUp();
+		} else {
+			elem.slideDown();
+		}
+	},
+
 	escapeResourceName: function(resource) {
 		return resource.replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~]/g, "\\$&");
 	},
@@ -1089,7 +1099,15 @@ function program1(depth0,data) {
   if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "'>Raw</a>\n    </li>\n  </ul>\n</div>\n<ul class='endpoints' id='";
+    + "'>Raw</a>\n    </li>\n    <li>\n      <a href='#' onclick=\"Docs.toggleShowQueryOperationsForResource('";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "')\">Query</a>\n    </li>\n  </ul>\n</div>\n<div class='query-operations-holder' id='";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "_query_operations_holder' style='display:none; text-align: right; padding-bottom: 6px;'>\n  <input type='text' class='query-operations-input' style='width:200px; font-size: 12px; padding: 4px 6px;' placeholder='请输入关键字，回车' />\n</div>\n<ul class='endpoints' id='";
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -1472,30 +1490,36 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     }
 
     ResourceView.prototype.events = {
-      'change .swagger-select-pager': 'pageChange'
+      'change .swagger-select-pager': 'pageChange',
+      'keyup .query-operations-input': 'operationsFilter'
     };
 
     ResourceView.prototype.initialize = function(options) {
       this.pageNum = options.pageNum;
       this.pageSize = options.pageSize;
-      this.pageTotal = Math.ceil(this.model.operationsArray.length / this.pageSize);
-      return log(this.pageNum, this.pageSize, this.pageTotal);
+      this.filteredOperationsArray = this.model.operationsArray;
+      return this.pageTotal = Math.ceil(this.model.operationsArray.length / this.pageSize);
     };
 
     ResourceView.prototype.render = function() {
       var operation, _i, _len, _ref;
       $(this.el).html(Handlebars.templates.resource(this.model));
+      this.renderPager();
+      this.number = 0;
+      _ref = this.filteredOperationsArray;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        operation = _ref[_i];
+        this.addOperation(operation);
+      }
+      return this;
+    };
+
+    ResourceView.prototype.renderPager = function() {
       $('.swagger-ui-pager', this.el).html(Handlebars.templates.resource_pager({
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         pageTotal: this.pageTotal
       }));
-      this.number = 0;
-      _ref = this.model.operationsArray;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        operation = _ref[_i];
-        this.addOperation(operation);
-      }
       return this;
     };
 
@@ -1514,17 +1538,64 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     };
 
     ResourceView.prototype.pageChange = function(e) {
-      var operation, _i, _len, _ref, _results;
+      var operation, _i, _len, _ref;
       $('.endpoints', this.el).empty();
       this.number = 0;
       this.pageNum = $(e.target).val();
-      _ref = this.model.operationsArray;
-      _results = [];
+      _ref = this.filteredOperationsArray;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         operation = _ref[_i];
-        _results.push(this.addOperation(operation));
+        this.addOperation(operation);
       }
-      return _results;
+      this.markFilterKeyWords();
+      return this;
+    };
+
+    ResourceView.prototype.operationsFilter = function(e) {
+      var filteredOperationsArray, operation, _fn, _i, _j, _len, _len1, _ref, _ref1;
+      if (e.keyCode !== 13) {
+        return;
+      }
+      filteredOperationsArray = [];
+      _ref = this.model.operationsArray;
+      _fn = function(operation) {
+        if (new RegExp(e.target.value, 'i').test(operation.path)) {
+          return filteredOperationsArray.push(operation);
+        }
+      };
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        operation = _ref[_i];
+        _fn(operation);
+      }
+      this.filteredOperationsArray = filteredOperationsArray;
+      this.pageNum = 1;
+      this.pageTotal = Math.ceil(this.filteredOperationsArray.length / this.pageSize);
+      this.renderPager();
+      this.number = 0;
+      $('.endpoints', this.el).empty();
+      _ref1 = this.filteredOperationsArray;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        operation = _ref1[_j];
+        this.addOperation(operation);
+      }
+      this.markFilterKeyWords();
+      return this;
+    };
+
+    ResourceView.prototype.markFilterKeyWords = function() {
+      var keyWords, path, paths, _fn, _i, _len;
+      keyWords = $('.query-operations-input', this.el).val();
+      if (keyWords) {
+        paths = $('.operations .heading .path a', this.el);
+        _fn = function(path) {
+          return $(path).html($(path).html().replace(new RegExp(keyWords, 'ig'), '<b style="color:red;">$&</b>'));
+        };
+        for (_i = 0, _len = paths.length; _i < _len; _i++) {
+          path = paths[_i];
+          _fn(path);
+        }
+      }
+      return this;
     };
 
     return ResourceView;
