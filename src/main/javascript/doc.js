@@ -135,6 +135,7 @@ var Docs = {
 
 		var elem = $('li#resource_' + resource + ' ul.endpoints');
 		elem.slideDown();
+		$('#resource_' + resource + ' div.swagger-ui-pager').slideDown();
 	},
 
 	// Collapse resource and mark as explicitly closed
@@ -144,6 +145,8 @@ var Docs = {
 
 		var elem = $('li#resource_' + resource + ' ul.endpoints');
 		elem.slideUp();
+		$('#resource_' + resource + ' div.query-operations-holder').slideUp();
+		$('#resource_' + resource + ' div.swagger-ui-pager').slideUp();
 	},
 
 	expandOperationsForResource: function(resource) {
