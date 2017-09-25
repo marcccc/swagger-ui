@@ -297,25 +297,25 @@ function program6(depth0,data) {
 function program8(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n        , <span style=\"font-variant: small-caps\">api version</span>: ";
+  buffer += "\n    , <span style=\"font-variant: small-caps\">api version</span>: ";
   if (stack1 = helpers.apiVersion) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.apiVersion; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\n        ";
+    + "\n    ";
   return buffer;
   }
 
   buffer += "<div class='info' id='api_info'>\n  ";
   stack1 = helpers['if'].call(depth0, depth0.info, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n</div>\n<div class='container' id='resources_container'>\n    <ul id='resources'>\n    </ul>\n\n    <div class=\"footer\">\n        <br>\n        <br>\n        <h4 style=\"color: #999\">[ <span style=\"font-variant: small-caps\">base url</span>: ";
+  buffer += "\n</div>\n<div class='container' id='resources_container'>\n  <ul id='resources'>\n  </ul>\n  <div id=\"resources_pager\"></div>\n  <div class=\"footer\">\n    <br>\n    <h4 style=\"color: #999\">[ <span style=\"font-variant: small-caps\">base url</span>: ";
   if (stack1 = helpers.basePath) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.basePath; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\n        ";
+    + "\n    ";
   stack1 = helpers['if'].call(depth0, depth0.apiVersion, {hash:{},inverse:self.noop,fn:self.program(8, program8, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "]</h4>\n    </div>\n</div>\n";
+  buffer += "]</h4>\n  </div>\n</div>\n";
   return buffer;
   });
 })();
@@ -1302,7 +1302,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     };
 
     SwaggerUi.prototype.load = function() {
-      var url, _ref;
+      var newUrl, url, _ref;
       if ((_ref = this.mainView) != null) {
         _ref.clear();
       }
@@ -1312,7 +1312,16 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
       }
       this.options.url = url;
       this.headerView.update(url);
-      this.api = new SwaggerApi(this.options);
+      newUrl = url;
+      if (newUrl.indexOf('?') === -1) {
+        newUrl += '?';
+      } else {
+        newUrl += '&';
+      }
+      newUrl += 'pageNum=' + this.options.pageNum + '&pageSize=' + this.options.pageSize;
+      this.api = new SwaggerApi(Object.assign({}, this.options, {
+        url: newUrl
+      }));
       this.api.build();
       return this.api;
     };
@@ -1467,7 +1476,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
         tagName: 'li',
         id: 'resource_' + resource.name,
         className: 'resource',
-        pageSize: 3,
+        pageSize: 10,
         pageNum: 1
       });
       return $('#resources').append(resourceView.render().el);

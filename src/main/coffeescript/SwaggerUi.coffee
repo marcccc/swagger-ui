@@ -47,7 +47,13 @@ class SwaggerUi extends Backbone.Router
 
     @options.url = url
     @headerView.update(url)
-    @api = new SwaggerApi(@options)
+    newUrl = url
+    if newUrl.indexOf('?') == -1
+      newUrl += '?'
+    else
+      newUrl += '&'
+    newUrl += 'pageNum=' + @options.pageNum + '&pageSize=' + @options.pageSize;
+    @api = new SwaggerApi(Object.assign({}, @options, { url: newUrl }))
     @api.build()
     @api
 

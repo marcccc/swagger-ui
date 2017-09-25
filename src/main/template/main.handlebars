@@ -8,15 +8,14 @@
   {{/if}}
 </div>
 <div class='container' id='resources_container'>
-    <ul id='resources'>
-    </ul>
-
-    <div class="footer">
-        <br>
-        <br>
-        <h4 style="color: #999">[ <span style="font-variant: small-caps">base url</span>: {{basePath}}
-        {{#if apiVersion}}
-        , <span style="font-variant: small-caps">api version</span>: {{apiVersion}}
-        {{/if}}]</h4>
-    </div>
+  <ul id='resources'>
+  </ul>
+  <div id="resources_pager"></div>
+  <div class="footer">
+    <br>
+    <h4 style="color: #999">[ <span style="font-variant: small-caps">base url</span>: {{basePath}}
+    {{#if apiVersion}}
+    , <span style="font-variant: small-caps">api version</span>: {{apiVersion}}
+    {{/if}}]</h4>
+  </div>
 </div>
