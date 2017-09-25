@@ -1,0 +1,7 @@
+<span>page no:</span>
+<select class='swagger-select-pager'>
+{{#pages pageTotal q}}
+  <option value='{{this.num}}' {{#if this.selected}}selected{{/if}}>{{this.num}}</option>
+{{/pages}}
+</select>
+<span style="margin-left:12px;">page total: <b>{{pageTotal}}</b></span>
